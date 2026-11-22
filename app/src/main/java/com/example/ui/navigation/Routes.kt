@@ -18,6 +18,9 @@ data object ImageToPdfRoute
 data object ScannerRoute
 
 @Serializable
+data class AutoCropRoute(val preselectedPdfId: Long? = null)
+
+@Serializable
 data class CompressPdfRoute(val preselectedId: Long? = null)
 
 @Serializable

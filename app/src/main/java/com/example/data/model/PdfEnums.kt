@@ -64,11 +64,18 @@ enum class SaveLocationOption(val label: String) {
     DOCUMENTS_EXPORT("Documents / Smart PDF Maker")
 }
 
+enum class AutoCropEnhancement(val label: String) {
+    ORIGINAL("Original"),
+    CLEAN_DOC("Clean Doc"),
+    CRISP_BW("Crisp B&W")
+}
+
 enum class MoreToolType(
     val id: String,
     val title: String,
     val subtitle: String
 ) {
+    AUTO_CROP("auto_crop", "Auto Crop & Straighten", "Fix tilted photos & crooked PDFs automatically"),
     SPLIT("split", "Split PDF", "Separate a PDF into parts or page ranges"),
     ROTATE("rotate", "Rotate PDF", "Rotate all or selected pages by 90°, 180°, or 270°"),
     PROTECT("protect", "Protect PDF", "Encrypt your PDF with a strong password"),

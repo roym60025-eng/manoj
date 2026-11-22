@@ -29,7 +29,40 @@ data class ImageToPdfPage(
     val id: String = UUID.randomUUID().toString(),
     val uri: Uri,
     val rotationDegrees: Int = 0,
-    val cropRect: NormalizedCropRect = NormalizedCropRect()
+    val cropRect: NormalizedCropRect = NormalizedCropRect(),
+    val autoCroppedFilePath: String? = null,
+    val autoCropSummary: String? = null
+)
+
+data class AutoCropAnalysis(
+    val quad: NormalizedQuad,
+    val skewAngleDegrees: Float,
+    val boundaryDetected: Boolean,
+    val skewDetected: Boolean
+) {
+    fun buildSummary(): String {
+        val parts = mutableListOf<String>()
+        if (skewDetected) {
+            val formatted = String.format(java.util.Locale.US, "%.1f°", kotlin.math.abs(skewAngleDegrees))
+            parts.add("Straightened $formatted tilt")
+        }
+        if (boundaryDetected) {
+            parts.add("Edges & margins cropped")
+        }
+        return if (parts.isEmpty()) "Already aligned" else parts.joinToString(" • ")
+    }
+}
+
+data class AutoCropPageItem(
+    val id: String = UUID.randomUUID().toString(),
+    val label: String,
+    val originalFilePath: String,
+    val croppedFilePath: String,
+    val detectedQuad: NormalizedQuad,
+    val skewAngleDegrees: Float = 0f,
+    val summary: String = "",
+    val enhancement: AutoCropEnhancement = AutoCropEnhancement.ORIGINAL,
+    val rotationDegrees: Int = 0
 )
 
 data class ImageToPdfConfig(

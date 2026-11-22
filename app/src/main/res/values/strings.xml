@@ -1,9 +1,3 @@
 <resources>
     <string name="app_name">Manoj Pdf Maker</string>
-    <string name="welcome_title">Welcome to Smart PDF Maker</string>
-    <string name="welcome_subtitle">Create, Scan, Edit and Manage Your PDF Files Easily.</string>
-    <string name="try_others">Try Others</string>
-    <string name="nav_home">Home</string>
-    <string name="nav_files">Files</string>
-    <string name="empty_pdf_message">No PDF files found. Create your first PDF.</string>
 </resources>

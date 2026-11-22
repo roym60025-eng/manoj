@@ -20,14 +20,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.MergeType
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Compress
+import androidx.compose.material.icons.filled.CropRotate
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.MergeType
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -100,6 +102,7 @@ fun HomeScreen(
     onMergePdf: () -> Unit,
     onDocxToPdf: () -> Unit,
     onMoreTools: () -> Unit,
+    onAutoCrop: () -> Unit = {},
     onOpenPdf: (PdfDocumentEntity) -> Unit,
     bottomBar: @Composable () -> Unit
 ) {
@@ -129,7 +132,7 @@ fun HomeScreen(
             HomeFeatureItem("Import PDF", Icons.Filled.FileDownload, FeatureIndigo, "feature_import_pdf", onImportPdf),
             HomeFeatureItem("Compress PDF", Icons.Filled.Compress, FeatureAmber, "feature_compress_pdf", onCompressPdf),
             HomeFeatureItem("PDF to JPG", Icons.Filled.PhotoLibrary, FeatureCoral, "feature_pdf_to_jpg", onPdfToJpg),
-            HomeFeatureItem("Merge PDF", Icons.Filled.MergeType, FeatureEmerald, "feature_merge_pdf", onMergePdf),
+            HomeFeatureItem("Merge PDF", Icons.AutoMirrored.Filled.MergeType, FeatureEmerald, "feature_merge_pdf", onMergePdf),
             HomeFeatureItem("DOCX to PDF", Icons.Filled.Description, FeatureTeal, "feature_docx_to_pdf", onDocxToPdf),
             HomeFeatureItem("More", Icons.Filled.GridView, FeatureViolet, "feature_more", onMoreTools)
         )
@@ -212,6 +215,78 @@ fun HomeScreen(
                                     )
                                 }
                             }
+                        }
+                    }
+                }
+
+                // Separate Auto Crop & Straighten Feature Card
+                item {
+                    Surface(
+                        onClick = onAutoCrop,
+                        color = colors.cardBackground,
+                        shape = RoundedCornerShape(20.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, FeatureCyan.copy(alpha = 0.28f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("feature_auto_crop")
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(46.dp)
+                                    .clip(CircleShape)
+                                    .background(FeatureCyan.copy(alpha = 0.16f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.CropRotate,
+                                    contentDescription = "Auto Crop & Straighten",
+                                    tint = FeatureCyan,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Spacer(Modifier.width(14.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "Auto Crop & Straighten",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = colors.textPrimary
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Surface(
+                                        color = FeatureCyan.copy(alpha = 0.18f),
+                                        shape = RoundedCornerShape(6.dp)
+                                    ) {
+                                        Text(
+                                            text = "AUTO",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = FeatureCyan,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.height(2.dp))
+                                Text(
+                                    text = "Fix tilted document photos & crooked PDFs automatically",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = colors.textSecondary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = colors.textSecondary
+                            )
                         }
                     }
                 }

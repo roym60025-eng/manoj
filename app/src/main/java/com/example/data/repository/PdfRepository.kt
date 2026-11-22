@@ -128,6 +128,54 @@ class PdfRepository(
         registerPdfFile(outFile, outFile.nameWithoutExtension, PdfCategory.SCANNED)
     }
 
+    suspend fun createPdfFromAutoCrop(
+        pages: List<com.example.data.model.AutoCropPageItem>,
+        fileName: String,
+        onProgress: (Float) -> Unit = {}
+    ): PdfDocumentEntity = withContext(Dispatchers.IO) {
+        val scanPages = pages.map { item ->
+            ScanPage(
+                id = item.id,
+                rawFilePath = item.originalFilePath,
+                processedFilePath = item.croppedFilePath,
+                quad = item.detectedQuad
+            )
+        }
+        val outFile = storageHelper.generateUniquePdfFile(fileName)
+        generationEngine.createPdfFromScannedPages(scanPages, outFile, onProgress)
+        registerPdfFile(outFile, outFile.nameWithoutExtension, PdfCategory.CREATED)
+    }
+
+    suspend fun exportAutoCroppedImages(
+        pages: List<com.example.data.model.AutoCropPageItem>,
+        baseName: String
+    ): ConvertedImageOutput = withContext(Dispatchers.IO) {
+        val folderName = "${StorageHelper.sanitizeFileBase(baseName)}_${System.currentTimeMillis() / 1000}"
+        val outDir = File(storageHelper.convertedImagesDir, folderName).apply { mkdirs() }
+        val exported = mutableListOf<File>()
+        pages.forEachIndexed { idx, item ->
+            val src = File(item.croppedFilePath)
+            if (src.exists()) {
+                val dst = File(outDir, "${StorageHelper.sanitizeFileBase(baseName)}_fixed_${idx + 1}.jpg")
+                src.copyTo(dst, overwrite = true)
+                exported.add(dst)
+                runCatching { storageHelper.copyImageToPublicPictures(dst, folderName) }
+            }
+        }
+        ConvertedImageOutput(exported, outDir)
+    }
+
+    suspend fun autoCropImageUri(uri: Uri): Pair<File, com.example.data.model.AutoCropAnalysis> =
+        withContext(Dispatchers.IO) {
+            val bmp = com.example.pdf.ImageProcessingHelper.decodeSampledBitmap(context, uri, maxDimension = 1800)
+            val (fixed, analysis) = com.example.pdf.ImageProcessingHelper.autoStraightenAndCrop(bmp)
+            bmp.recycle()
+            val outFile = File(storageHelper.tempDir, "i2p_autocrop_${java.util.UUID.randomUUID()}.jpg")
+            com.example.pdf.ImageProcessingHelper.saveBitmapToFile(fixed, outFile, quality = 92)
+            fixed.recycle()
+            outFile to analysis
+        }
+
     suspend fun createBlankPdf(
         fileName: String,
         pageCount: Int,

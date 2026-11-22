@@ -549,9 +549,11 @@ fun PdfToolDetailScreen(
                             }
                         }
                     }
+
+                    MoreToolType.AUTO_CROP -> Unit
                 }
 
-                if (toolType != MoreToolType.PDF_INFO) {
+                if (toolType != MoreToolType.PDF_INFO && toolType != MoreToolType.AUTO_CROP) {
                     val canRun = toolType == MoreToolType.CREATE_BLANK || selectedDoc != null
                     if (isProcessing) {
                         Row(
@@ -588,7 +590,7 @@ fun PdfToolDetailScreen(
                                             MoreToolType.EXTRACT_PAGES -> listOf(repository.extractPages(selectedDoc!!, selectedPageIndices.toList()))
                                             MoreToolType.DELETE_PAGES -> listOf(repository.deletePages(selectedDoc!!, selectedPageIndices))
                                             MoreToolType.REORDER_PAGES -> listOf(repository.reorderPages(selectedDoc!!, reorderIndices))
-                                            MoreToolType.PDF_INFO -> emptyList()
+                                            MoreToolType.PDF_INFO, MoreToolType.AUTO_CROP -> emptyList()
                                         }
                                     }.onSuccess { docs ->
                                         resultDocs = docs

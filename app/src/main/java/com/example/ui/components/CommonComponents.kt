@@ -26,8 +26,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.filled.MergeType
+import androidx.compose.material.icons.automirrored.filled.NoteAdd
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CropRotate
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
@@ -37,10 +41,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.MergeType
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.NoteAdd
-import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Share
@@ -232,6 +233,7 @@ fun CreateActionBottomSheet(
     onDismiss: () -> Unit,
     onCreateFromImages: () -> Unit,
     onScanDocument: () -> Unit,
+    onAutoCrop: () -> Unit = {},
     onImportPdf: () -> Unit,
     onMergePdf: () -> Unit,
     onCreateBlankPdf: () -> Unit
@@ -282,6 +284,17 @@ fun CreateActionBottomSheet(
                 }
             )
             SheetActionRow(
+                icon = Icons.Filled.CropRotate,
+                accentColor = FeatureCyan,
+                title = "Auto Crop & Straighten",
+                subtitle = "Automatically fix tilted photos & crooked PDFs",
+                testTag = "sheet_auto_crop",
+                onClick = {
+                    onDismiss()
+                    onAutoCrop()
+                }
+            )
+            SheetActionRow(
                 icon = Icons.Filled.FileDownload,
                 accentColor = FeatureIndigo,
                 title = "Import PDF",
@@ -293,7 +306,7 @@ fun CreateActionBottomSheet(
                 }
             )
             SheetActionRow(
-                icon = Icons.Filled.MergeType,
+                icon = Icons.AutoMirrored.Filled.MergeType,
                 accentColor = FeatureCoral,
                 title = "Merge PDF",
                 subtitle = "Combine multiple PDF files in custom order",
@@ -304,7 +317,7 @@ fun CreateActionBottomSheet(
                 }
             )
             SheetActionRow(
-                icon = Icons.Filled.NoteAdd,
+                icon = Icons.AutoMirrored.Filled.NoteAdd,
                 accentColor = FeatureTeal,
                 title = "Create Blank PDF",
                 subtitle = "Start with clean blank or ruled pages",
@@ -505,7 +518,7 @@ fun PdfListItemCard(
                         DropdownMenuItem(
                             text = { Text("Open PDF", color = colors.textPrimary) },
                             leadingIcon = {
-                                Icon(Icons.Filled.OpenInNew, null, tint = colors.primaryBlue)
+                                Icon(Icons.AutoMirrored.Filled.OpenInNew, null, tint = colors.primaryBlue)
                             },
                             onClick = {
                                 menuExpanded = false

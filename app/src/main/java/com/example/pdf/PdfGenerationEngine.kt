@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import androidx.core.graphics.createBitmap
 import com.example.data.model.ImageFitMode
 import com.example.data.model.ImageToPdfConfig
 import com.example.data.model.ImageToPdfPage
@@ -74,7 +75,11 @@ class PdfGenerationEngine(private val context: Context) {
                 val page = PDPage(pageRect)
                 document.addPage(page)
 
-                var bitmap = ImageProcessingHelper.decodeSampledBitmap(context, pageItem.uri, maxDimension = 2048)
+                var bitmap = if (!pageItem.autoCroppedFilePath.isNullOrBlank() && File(pageItem.autoCroppedFilePath).exists()) {
+                    ImageProcessingHelper.decodeFileBitmap(File(pageItem.autoCroppedFilePath), maxDimension = 2048)
+                } else {
+                    ImageProcessingHelper.decodeSampledBitmap(context, pageItem.uri, maxDimension = 2048)
+                }
                 if (!pageItem.cropRect.isFull) {
                     bitmap = ImageProcessingHelper.cropBitmap(bitmap, pageItem.cropRect)
                 }
@@ -237,7 +242,7 @@ class PdfGenerationEngine(private val context: Context) {
 
     private fun flattenOnWhite(source: Bitmap): Bitmap {
         if (!source.hasAlpha()) return source
-        val result = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+        val result = createBitmap(source.width, source.height)
         val canvas = Canvas(result)
         canvas.drawColor(Color.WHITE)
         canvas.drawBitmap(source, 0f, 0f, Paint(Paint.ANTI_ALIAS_FLAG))

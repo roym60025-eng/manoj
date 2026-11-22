@@ -1,9 +1,10 @@
 package com.example.ui.screens.scanner
 
+import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.model.NormalizedQuad
 import com.example.data.model.PdfDocumentEntity
@@ -40,9 +41,9 @@ data class ScannerUiState(
 )
 
 class ScannerViewModel(
-    private val context: Context,
+    context: Context,
     private val repository: PdfRepository
-) : ViewModel() {
+) : AndroidViewModel(context.applicationContext as Application) {
 
     private val _uiState = MutableStateFlow(ScannerUiState())
     val uiState: StateFlow<ScannerUiState> = _uiState.asStateFlow()
@@ -81,7 +82,11 @@ class ScannerViewModel(
             _uiState.update { it.copy(isProcessing = true, errorMessage = null) }
             runCatching {
                 withContext(Dispatchers.IO) {
-                    val bmp = ImageProcessingHelper.decodeSampledBitmap(context, uri, maxDimension = 1800)
+                    val bmp = ImageProcessingHelper.decodeSampledBitmap(
+                        getApplication<Application>(),
+                        uri,
+                        maxDimension = 1800
+                    )
                     val rawFile = File(repository.storageHelper.tempDir, "scan_raw_${UUID.randomUUID()}.jpg")
                     ImageProcessingHelper.saveBitmapToFile(bmp, rawFile, quality = 94)
                     val quad = ImageProcessingHelper.detectDocumentQuad(bmp)

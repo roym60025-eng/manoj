@@ -37,6 +37,7 @@ import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.DragHandle
@@ -45,6 +46,7 @@ import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -274,6 +276,58 @@ fun ImageToPdfScreen(
                                     color = colors.textSecondary
                                 )
                             }
+                            Surface(
+                                color = colors.secondaryBackground,
+                                shape = RoundedCornerShape(14.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.AutoFixHigh,
+                                            contentDescription = "Auto Crop",
+                                            tint = com.example.ui.theme.FeatureCyan,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(Modifier.width(10.dp))
+                                        Column {
+                                            Text(
+                                                "Auto Crop & Straighten",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = colors.textPrimary
+                                            )
+                                            Text(
+                                                "Fix tilted documents automatically",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = colors.textSecondary
+                                            )
+                                        }
+                                    }
+                                    if (state.isAutoCropping) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(22.dp),
+                                            strokeWidth = 2.dp,
+                                            color = PrimaryBlue
+                                        )
+                                    } else {
+                                        Switch(
+                                            checked = state.autoCropEnabled,
+                                            onCheckedChange = { viewModel.toggleAutoCrop(it) },
+                                            colors = SwitchDefaults.colors(checkedTrackColor = PrimaryBlue),
+                                            modifier = Modifier.testTag("image_to_pdf_autocrop_switch")
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -342,8 +396,9 @@ fun ImageToPdfScreen(
                                         .background(colors.secondaryBackground),
                                     contentAlignment = Alignment.Center
                                 ) {
+                                    val previewModel: Any = page.autoCroppedFilePath?.let { java.io.File(it) } ?: page.uri
                                     AsyncImage(
-                                        model = page.uri,
+                                        model = previewModel,
                                         contentDescription = "Page ${index + 1}",
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier
@@ -359,13 +414,15 @@ fun ImageToPdfScreen(
                                         color = colors.textPrimary
                                     )
                                     val tags = buildList {
+                                        if (page.autoCroppedFilePath != null) add("Auto-Cropped")
                                         if (page.rotationDegrees != 0) add("${page.rotationDegrees}°")
                                         if (!page.cropRect.isFull) add("Cropped")
                                     }.joinToString(" • ")
                                     Text(
-                                        text = if (tags.isEmpty()) "Original" else tags,
+                                        text = page.autoCropSummary?.takeIf { page.autoCroppedFilePath != null }
+                                            ?: if (tags.isEmpty()) "Original" else tags,
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = colors.textSecondary
+                                        color = if (page.autoCroppedFilePath != null) com.example.ui.theme.FeatureCyan else colors.textSecondary
                                     )
                                 }
                                 if (index > 0) {
@@ -377,6 +434,9 @@ fun ImageToPdfScreen(
                                     IconButton(onClick = { viewModel.movePage(index, index + 1) }) {
                                         Icon(Icons.Filled.ArrowDownward, "Move down", tint = colors.textSecondary, modifier = Modifier.size(18.dp))
                                     }
+                                }
+                                IconButton(onClick = { viewModel.autoCropSinglePage(page.id) }) {
+                                    Icon(Icons.Filled.AutoFixHigh, "Auto Crop page", tint = com.example.ui.theme.FeatureCyan, modifier = Modifier.size(20.dp))
                                 }
                                 IconButton(onClick = { viewModel.rotatePage(page.id) }) {
                                     Icon(Icons.AutoMirrored.Filled.RotateRight, "Rotate 90°", tint = PrimaryBlueLight, modifier = Modifier.size(20.dp))
@@ -705,6 +765,14 @@ private fun ImageCropDialog(
         },
         dismissButton = {
             Row {
+                TextButton(onClick = {
+                    previewBmp?.let { bmp ->
+                        val rect = ImageProcessingHelper.detectAutoCropRect(bmp)
+                        left = rect.left; top = rect.top; right = rect.right; bottom = rect.bottom
+                    }
+                }) {
+                    Text("Auto", color = com.example.ui.theme.FeatureCyan)
+                }
                 TextButton(onClick = {
                     left = 0f; top = 0f; right = 1f; bottom = 1f
                 }) {

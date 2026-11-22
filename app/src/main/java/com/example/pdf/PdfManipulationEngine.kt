@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 import com.example.data.model.CompressionLevel
 import com.example.data.model.ConvertedImageOutput
 import com.example.data.model.ImageExportFormat
@@ -75,7 +77,7 @@ class PdfManipulationEngine {
                                 val scaledW = (bmp.width * level.scaleFactor).roundToInt().coerceAtLeast(32)
                                 val scaledH = (bmp.height * level.scaleFactor).roundToInt().coerceAtLeast(32)
                                 val scaled = if (scaledW < bmp.width || scaledH < bmp.height) {
-                                    Bitmap.createScaledBitmap(bmp, scaledW, scaledH, true).also {
+                                    bmp.scale(scaledW, scaledH).also {
                                         if (it !== bmp) bmp.recycle()
                                     }
                                 } else {
@@ -125,7 +127,7 @@ class PdfManipulationEngine {
                                 val scale = targetWidth.toFloat() / ptW.coerceAtLeast(1f)
                                 val bmpW = targetWidth.coerceAtLeast(100)
                                 val bmpH = (ptH * scale).roundToInt().coerceAtLeast(100)
-                                val bmp = Bitmap.createBitmap(bmpW, bmpH, Bitmap.Config.ARGB_8888)
+                                val bmp = createBitmap(bmpW, bmpH)
                                 bmp.eraseColor(Color.WHITE)
                                 page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
 
@@ -186,7 +188,7 @@ class PdfManipulationEngine {
                         val targetW = 1440
                         val scale = targetW.toFloat() / page.width.coerceAtLeast(1)
                         val targetH = (page.height * scale).roundToInt().coerceAtLeast(1)
-                        val bmp = Bitmap.createBitmap(targetW, targetH, Bitmap.Config.ARGB_8888)
+                        val bmp = createBitmap(targetW, targetH)
                         bmp.eraseColor(Color.WHITE)
                         page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
 

@@ -19,17 +19,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.BrandingWatermark
 import androidx.compose.material.icons.automirrored.filled.CallSplit
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.NoteAdd
 import androidx.compose.material.icons.automirrored.filled.RotateRight
-import androidx.compose.material.icons.filled.BrandingWatermark
+import androidx.compose.material.icons.filled.CropRotate
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.FileCopy
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -139,16 +140,17 @@ fun MoreToolsScreen(
 
 private fun toolVisuals(tool: MoreToolType): Pair<ImageVector, Color> {
     return when (tool) {
+        MoreToolType.AUTO_CROP -> Icons.Filled.CropRotate to FeatureCyan
         MoreToolType.SPLIT -> Icons.AutoMirrored.Filled.CallSplit to FeatureBlue
         MoreToolType.ROTATE -> Icons.AutoMirrored.Filled.RotateRight to FeatureCyan
         MoreToolType.PROTECT -> Icons.Filled.Lock to FeatureCoral
         MoreToolType.UNLOCK -> Icons.Filled.LockOpen to FeatureEmerald
-        MoreToolType.WATERMARK -> Icons.Filled.BrandingWatermark to FeatureIndigo
+        MoreToolType.WATERMARK -> Icons.AutoMirrored.Filled.BrandingWatermark to FeatureIndigo
         MoreToolType.PAGE_NUMBERS -> Icons.Filled.FormatListNumbered to FeatureAmber
         MoreToolType.EXTRACT_PAGES -> Icons.Filled.FileCopy to FeatureTeal
         MoreToolType.DELETE_PAGES -> Icons.Filled.DeleteSweep to FeatureCoral
         MoreToolType.REORDER_PAGES -> Icons.Filled.SwapVert to FeatureViolet
         MoreToolType.PDF_INFO -> Icons.Filled.Info to FeatureBlue
-        MoreToolType.CREATE_BLANK -> Icons.Filled.NoteAdd to FeatureEmerald
+        MoreToolType.CREATE_BLANK -> Icons.AutoMirrored.Filled.NoteAdd to FeatureEmerald
     }
 }

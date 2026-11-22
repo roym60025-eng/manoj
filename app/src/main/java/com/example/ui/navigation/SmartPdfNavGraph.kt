@@ -29,6 +29,8 @@ import com.example.data.model.MoreToolType
 import com.example.ui.components.CreateActionBottomSheet
 import com.example.ui.components.SmartPdfBottomBar
 import com.example.ui.factory
+import com.example.ui.screens.autocrop.AutoCropScreen
+import com.example.ui.screens.autocrop.AutoCropViewModel
 import com.example.ui.screens.files.FilesScreen
 import com.example.ui.screens.home.HomeScreen
 import com.example.ui.screens.home.HomeViewModel
@@ -142,6 +144,7 @@ fun SmartPdfNavGraph(
                 onMergePdf = { navController.navigate(MergePdfRoute) },
                 onDocxToPdf = { navController.navigate(DocxToPdfRoute) },
                 onMoreTools = { navController.navigate(MoreToolsRoute) },
+                onAutoCrop = { navController.navigate(AutoCropRoute()) },
                 onOpenPdf = { doc -> navController.navigate(PdfViewerRoute(doc.id)) },
                 bottomBar = {
                     SmartPdfBottomBar(
@@ -203,6 +206,21 @@ fun SmartPdfNavGraph(
             )
         }
 
+        composable<AutoCropRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<AutoCropRoute>()
+            val vm: AutoCropViewModel = viewModel(
+                factory = container.factory {
+                    AutoCropViewModel(context.applicationContext, pdfRepository, route.preselectedPdfId)
+                }
+            )
+            AutoCropScreen(
+                viewModel = vm,
+                repository = container.pdfRepository,
+                onBack = { navController.popBackStack() },
+                onOpenPdf = { doc -> navController.navigate(PdfViewerRoute(doc.id)) }
+            )
+        }
+
         composable<CompressPdfRoute> { backStackEntry ->
             val route = backStackEntry.toRoute<CompressPdfRoute>()
             CompressPdfScreen(
@@ -242,7 +260,11 @@ fun SmartPdfNavGraph(
             MoreToolsScreen(
                 onBack = { navController.popBackStack() },
                 onSelectTool = { tool ->
-                    navController.navigate(PdfToolDetailRoute(tool.id))
+                    if (tool == MoreToolType.AUTO_CROP) {
+                        navController.navigate(AutoCropRoute())
+                    } else {
+                        navController.navigate(PdfToolDetailRoute(tool.id))
+                    }
                 }
             )
         }
@@ -292,6 +314,7 @@ fun SmartPdfNavGraph(
             onDismiss = { showCreateSheet = false },
             onCreateFromImages = { navController.navigate(ImageToPdfRoute) },
             onScanDocument = { navController.navigate(ScannerRoute) },
+            onAutoCrop = { navController.navigate(AutoCropRoute()) },
             onImportPdf = { importPdfLauncher.launch(arrayOf("application/pdf")) },
             onMergePdf = { navController.navigate(MergePdfRoute) },
             onCreateBlankPdf = {

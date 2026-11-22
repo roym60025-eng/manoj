@@ -18,6 +18,7 @@ import com.example.data.model.PdfDocumentEntity
 import com.example.data.model.SortOrder
 import com.example.data.repository.PdfRepository
 import com.example.pdf.DocxToPdfEngine
+import com.example.pdf.ImageProcessingHelper
 import com.example.pdf.PdfGenerationEngine
 import com.example.pdf.PdfManipulationEngine
 import com.example.pdf.PdfRendererHelper
@@ -255,5 +256,60 @@ class SmartPdfEngineTest {
 
         repository.deleteDocuments(listOf(reloaded!!, doc2))
         assertTrue(repository.allDocuments.first().isEmpty())
+    }
+
+    @Test
+    fun `autoStraightenAndCrop detects and straightens tilted document on dark background`() {
+        val width = 400
+        val height = 520
+        val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bmp)
+        canvas.drawColor(Color.rgb(22, 24, 34)) // Dark table background
+
+        canvas.save()
+        canvas.rotate(14f, width / 2f, height / 2f)
+        val paperPaint = android.graphics.Paint().apply { color = Color.WHITE }
+        canvas.drawRect(85f, 80f, 315f, 440f, paperPaint)
+        val textPaint = android.graphics.Paint().apply {
+            color = Color.DKGRAY
+            strokeWidth = 4f
+        }
+        for (y in 120..400 step 24) {
+            canvas.drawLine(110f, y.toFloat(), 290f, y.toFloat(), textPaint)
+        }
+        canvas.restore()
+
+        val (resultBmp, analysis) = ImageProcessingHelper.autoStraightenAndCrop(bmp)
+        assertTrue(analysis.boundaryDetected || analysis.skewDetected)
+        assertTrue(resultBmp.width > 100 && resultBmp.height > 100)
+        // Center pixel of straightened document should remain bright paper
+        val centerLuma = Color.red(resultBmp.getPixel(resultBmp.width / 2, resultBmp.height / 2))
+        assertTrue(centerLuma > 200)
+        resultBmp.recycle()
+        bmp.recycle()
+    }
+
+    @Test
+    fun `detectSkewAngle identifies tilted text lines in full-frame document`() {
+        val width = 400
+        val height = 500
+        val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bmp)
+        canvas.drawColor(Color.WHITE)
+
+        canvas.save()
+        canvas.rotate(-10f, width / 2f, height / 2f)
+        val linePaint = android.graphics.Paint().apply {
+            color = Color.BLACK
+            strokeWidth = 4f
+        }
+        for (y in 90..410 step 22) {
+            canvas.drawLine(60f, y.toFloat(), 340f, y.toFloat(), linePaint)
+        }
+        canvas.restore()
+
+        val detected = ImageProcessingHelper.detectSkewAngle(bmp)
+        assertTrue("Expected positive deskew near +10 deg, got $detected", detected in 6f..14f)
+        bmp.recycle()
     }
 }

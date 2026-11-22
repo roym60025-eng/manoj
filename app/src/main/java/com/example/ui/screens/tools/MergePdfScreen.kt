@@ -21,12 +21,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.MergeType
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.MergeType
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -297,7 +297,7 @@ fun MergePdfScreen(
                                 .height(56.dp)
                                 .testTag("merge_pdfs_button")
                         ) {
-                            Icon(Icons.Filled.MergeType, null, tint = Color.White)
+                            Icon(Icons.AutoMirrored.Filled.MergeType, null, tint = Color.White)
                             Spacer(Modifier.width(8.dp))
                             Text("Merge ${selectedPdfs.size} PDFs", color = Color.White, fontWeight = FontWeight.Bold)
                         }

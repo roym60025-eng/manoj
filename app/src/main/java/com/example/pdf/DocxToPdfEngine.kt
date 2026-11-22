@@ -7,7 +7,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.text.Layout
 import android.util.Xml
-import com.example.R
+import androidx.core.graphics.toColorInt
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.pdmodel.PDPage
 import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
@@ -219,7 +219,7 @@ class DocxToPdfEngine(private val context: Context) {
                         "w:color" -> {
                             val hex = parser.getAttributeValue(null, "w:val")
                             if (!hex.isNullOrBlank() && hex != "auto" && hex.length == 6) {
-                                runCatching { colorInt = Color.parseColor("#$hex") }
+                                runCatching { colorInt = "#$hex".toColorInt() }
                             }
                         }
                         "w:t" -> {
@@ -325,7 +325,7 @@ class DocxToPdfEngine(private val context: Context) {
 
         PDDocument().use { document ->
             val unicodeFont: PDFont? = runCatching {
-                context.resources.openRawResource(R.font.inter).use { stream ->
+                context.assets.open("fonts/inter.ttf").use { stream ->
                     PDType0Font.load(document, stream)
                 }
             }.getOrNull()

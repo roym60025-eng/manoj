@@ -20,6 +20,8 @@ import com.example.pdf.PdfManipulationEngine
 import com.example.pdf.PdfRendererHelper
 import com.example.pdf.StorageHelper
 import com.example.ui.components.SmartPdfBottomBar
+import com.example.ui.screens.autocrop.AutoCropScreen
+import com.example.ui.screens.autocrop.AutoCropViewModel
 import com.example.ui.screens.home.HomeScreen
 import com.example.ui.screens.home.HomeViewModel
 import com.example.ui.screens.more.MoreToolsScreen
@@ -120,8 +122,45 @@ class SmartPdfUiCujTest {
         composeTestRule.onNodeWithTag("feature_merge_pdf").assertIsDisplayed()
         composeTestRule.onNodeWithTag("feature_docx_to_pdf").assertIsDisplayed()
         composeTestRule.onNodeWithTag("feature_more").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("feature_auto_crop").assertIsDisplayed()
         composeTestRule.onNodeWithText("No PDF files found. Create your first PDF.").assertIsDisplayed()
         composeTestRule.onNodeWithTag("nav_plus_fab").assertIsDisplayed()
+        db.close()
+    }
+
+    @Test
+    fun `auto crop screen displays image, camera, and pdf entry controls`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val db = Room.inMemoryDatabaseBuilder(context, SmartPdfDatabase::class.java)
+            .allowMainThreadQueries()
+            .build()
+        val storage = StorageHelper(context)
+        val repo = PdfRepository(
+            context = context,
+            pdfDao = db.pdfDao(),
+            preferencesRepository = UserPreferencesRepository(context),
+            storageHelper = storage,
+            rendererHelper = PdfRendererHelper(storage),
+            generationEngine = PdfGenerationEngine(context),
+            manipulationEngine = PdfManipulationEngine(),
+            docxEngine = DocxToPdfEngine(context)
+        )
+        val vm = AutoCropViewModel(context, repo)
+        composeTestRule.setContent {
+            SmartPdfMakerTheme(darkTheme = true) {
+                AutoCropScreen(
+                    viewModel = vm,
+                    repository = repo,
+                    onBack = {},
+                    onOpenPdf = {}
+                )
+            }
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("autocrop_pick_gallery").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("autocrop_pick_files").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("autocrop_pick_camera").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("autocrop_pick_pdf").assertIsDisplayed()
         db.close()
     }
 
