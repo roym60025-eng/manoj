@@ -1,5 +1,5 @@
 {
-  "name": "Smart PDF Maker",
+  "name": "Manoj Pdf Maker",
   "description": "Create, scan, edit, convert, compress, merge, and manage PDF documents on Android with a modern dark Material 3 interface.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
